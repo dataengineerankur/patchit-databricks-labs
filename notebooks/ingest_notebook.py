@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any
 
 
@@ -51,7 +51,7 @@ def run_pipeline(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         else:
             bad.append(r)
     # Bronze = raw, Silver = validated, Gold = aggregate
-    gold = {"count": len(good), "ts": datetime.utcnow().isoformat()}
+    gold = {"count": len(good), "ts": datetime.now(timezone.utc).isoformat()}
     return {"bronze": len(rows), "silver": len(good), "bad": len(bad), "gold": gold}
 
 
