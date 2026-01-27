@@ -7,6 +7,28 @@ targets:
 
 resources:
   jobs:
+    patchit_ingest_job:
+      name: patchit-ingest-job
+      tasks:
+        - task_key: ingest_task
+          notebook_task:
+            notebook_path: /Shared/patchit/ingest_notebook
+            source: WORKSPACE
+          existing_cluster_id: 0126-041553-ds2n8zhe
+      queue:
+        enabled: false
+
+    patchit_quality_job:
+      name: patchit-quality-job
+      tasks:
+        - task_key: quality_task
+          notebook_task:
+            notebook_path: /Shared/patchit/quality_notebook
+            source: WORKSPACE
+          existing_cluster_id: 0126-041553-ds2n8zhe
+      queue:
+        enabled: false
+
     patchit_dedup_job:
       name: patchit-dedup-job
       tasks:
