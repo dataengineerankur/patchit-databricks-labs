@@ -1,0 +1,21 @@
+{
+  "platform": "databricks",
+  "repo_path": "/path/to/patchit-databricks-labs",
+  "git_sha": "local",
+  "job_id": "dbx_job_demo",
+  "run_id": "run_DBX1_schema_drift",
+  "timestamp": "2026-01-24T00:00:00Z",
+  "failure_signature": "DBX1_schema_drift",
+  "log_excerpt": "Schema mismatch: column 'event_ts' missing",
+  "suspected_root_cause": "Producer schema drift not handled in Bronze ingestion",
+  "impacted_assets": ["bronze.events", "silver.events", "gold.events_summary"],
+  "proposed_fix_summary": "Add schema evolution guard + quarantine invalid rows",
+  "diff_preview": "diff --git a/notebooks/ingest_notebook.py b/notebooks/ingest_notebook.py\n...",
+  "confidence": 0.62,
+  "stop_condition_evaluation": [],
+  "rollback_plan": "Revert PR and re-run job with previous schema",
+  "verification": {
+    "commands": ["python notebooks/local_runner.py --input data/sample_input.json --output out/"],
+    "results": "pending"
+  }
+}

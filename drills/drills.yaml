@@ -1,0 +1,84 @@
+version: 1
+platform: databricks
+drills:
+  - scenario_id: DBX1_schema_drift
+    enabled: true
+    injection: "Upstream adds/renames a column in input payload."
+    expected_rca: "Producer schema drift not handled in Bronze ingestion."
+    expected_fix: "Update schema contract + add schema evolution guard or quarantine."
+    stop_conditions: ["touches secrets", "diff > 300 lines", "changes > 5 files"]
+    verify_steps:
+      - "Rerun job; Bronze write succeeds with new column or quarantines bad rows."
+      - "Gold aggregate row counts stable."
+  - scenario_id: DBX2_wrong_payload
+    enabled: true
+    injection: "Inject error-shaped rows in input (missing fields / bad types)."
+    expected_rca: "Parser assumes required fields; no quarantine path."
+    expected_fix: "Add validation + quarantine bad rows with metrics."
+    stop_conditions: ["touches secrets", "diff > 300 lines", "changes > 5 files"]
+    verify_steps:
+      - "Job succeeds; bad rows quarantined."
+  - scenario_id: DBX3_partial_write
+    enabled: false
+    injection: "Simulate partial write by disabling atomic commit."
+    expected_rca: "Non-atomic output publish."
+    expected_fix: "Use atomic write + commit marker."
+    stop_conditions: ["destructive delete", "diff > 300 lines"]
+    verify_steps:
+      - "Downstream reads complete dataset only."
+  - scenario_id: DBX4_duplicate_rerun
+    enabled: false
+    injection: "Re-run job with same input, duplicates appear."
+    expected_rca: "No idempotency key."
+    expected_fix: "Dedup by business key + run_id."
+    stop_conditions: ["diff > 300 lines"]
+    verify_steps:
+      - "Row counts stable after rerun."
+  - scenario_id: DBX5_null_spike
+    enabled: false
+    injection: "Spike of nulls in key column."
+    expected_rca: "Missing null validation."
+    expected_fix: "Add null checks + quarantine."
+    stop_conditions: ["diff > 300 lines"]
+    verify_steps:
+      - "Nulls quarantined; pipeline passes."
+  - scenario_id: DBX6_secret_or_perm
+    enabled: false
+    injection: "Remove secret scope permission."
+    expected_rca: "Access denied to secret scope."
+    expected_fix: "Report-only: recommend least-privilege IAM/secret config."
+    stop_conditions: ["Patchit must refuse to guess secrets"]
+    verify_steps:
+      - "PATCHIT refuses and produces a report."
+  - scenario_id: DBX7_bad_timestamp
+    enabled: false
+    injection: "Send invalid timestamps or future dates."
+    expected_rca: "Timestamp parsing lacks guardrails."
+    expected_fix: "Add parsing validation + quarantine."
+    stop_conditions: ["diff > 300 lines"]
+    verify_steps:
+      - "Invalid timestamps quarantined."
+  - scenario_id: DBX8_skew_hint
+    enabled: false
+    injection: "Single key dominates data distribution."
+    expected_rca: "No skew handling in aggregation."
+    expected_fix: "Add salting or skew-safe aggregation."
+    stop_conditions: ["diff > 300 lines"]
+    verify_steps:
+      - "Job completes with skew-safe aggregation."
+  - scenario_id: DBX7_skew_oom
+    enabled: false
+    injection: "Introduce extreme key skew causing OOM."
+    expected_rca: "Skewed partitioning leads to executor OOM."
+    expected_fix: "Add salting/repartition + skew handling."
+    stop_conditions: ["diff > 300 lines"]
+    verify_steps:
+      - "Job completes without OOM."
+  - scenario_id: DBX8_bad_dedup_key
+    enabled: false
+    injection: "Dedup key missing/incorrect leads to duplicates."
+    expected_rca: "Dedup logic uses unstable key."
+    expected_fix: "Use stable business key + watermark."
+    stop_conditions: ["diff > 300 lines"]
+    verify_steps:
+      - "Duplicate rate drops to near zero."

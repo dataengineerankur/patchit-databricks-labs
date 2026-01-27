@@ -1,0 +1,5 @@
+[
+  {"id": 1, "event_ts": "2025-01-01T00:00:00Z", "status": "ok", "value": 1.2},
+  {"id": 2, "event_ts": "2025-01-01T01:00:00Z", "status": "ok", "value": 2.5},
+  {"id": 3, "event_ts": null, "status": "ok", "value": 3.1}
+]

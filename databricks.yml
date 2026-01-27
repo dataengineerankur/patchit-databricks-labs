@@ -1,0 +1,19 @@
+bundle:
+  name: patchit-databricks-labs
+
+targets:
+  dev:
+    default: true
+
+resources:
+  jobs:
+    patchit_dedup_job:
+      name: patchit-dedup-job
+      tasks:
+        - task_key: dedup_task
+          notebook_task:
+            notebook_path: /Shared/patchit/dedup_notebook
+            source: WORKSPACE
+          existing_cluster_id: 0126-041553-ds2n8zhe
+      queue:
+        enabled: false
