@@ -7,13 +7,128 @@ targets:
 
 resources:
   jobs:
-    patchit_dedup_job:
-      name: patchit-dedup-job
+    # --- Pipeline 1: Marketing Campaign Attribution ---
+    campaign_etl_daily:
+      name: campaign_etl_daily
+      tags:
+        team: marketing-analytics
+        domain: customer_payments
       tasks:
-        - task_key: dedup_task
+        - task_key: campaign_attribution
           notebook_task:
-            notebook_path: /Shared/patchit/dedup_notebook
+            notebook_path: /Shared/patchit/campaign_etl_daily
             source: WORKSPACE
           existing_cluster_id: 0126-041553-ds2n8zhe
+      schedule:
+        quartz_cron_expression: "0 0 2 * * ?"
+        timezone_id: UTC
+      queue:
+        enabled: false
+
+    # --- Pipeline 2: Finance Transactions Ingest ---
+    finance_ingest_job:
+      name: finance_ingest_job
+      tags:
+        team: finance-data-eng
+        domain: customer_payments
+      tasks:
+        - task_key: finance_ingest
+          notebook_task:
+            notebook_path: /Shared/patchit/finance_ingest_job
+            source: WORKSPACE
+          existing_cluster_id: 0126-041553-ds2n8zhe
+      schedule:
+        quartz_cron_expression: "0 0 3 * * ?"
+        timezone_id: UTC
+      queue:
+        enabled: false
+
+    # --- Pipeline 3: Compliance Audit Logs ---
+    audit_log_etl_job:
+      name: audit_log_etl_job
+      tags:
+        team: compliance-eng
+        domain: customer_payments
+      tasks:
+        - task_key: audit_etl
+          notebook_task:
+            notebook_path: /Shared/patchit/audit_log_etl_job
+            source: WORKSPACE
+          existing_cluster_id: 0126-041553-ds2n8zhe
+      schedule:
+        quartz_cron_expression: "0 0 */3 * * ?"
+        timezone_id: UTC
+      queue:
+        enabled: false
+
+    # --- Pipeline 4: Customer Transactions Merge ---
+    campaign_etl_daily_job:
+      name: campaign_etl_daily_job
+      tags:
+        team: customer-analytics
+        domain: customer_payments
+      tasks:
+        - task_key: customer_txn_merge
+          notebook_task:
+            notebook_path: /Shared/patchit/campaign_etl_daily_job
+            source: WORKSPACE
+          existing_cluster_id: 0126-041553-ds2n8zhe
+      schedule:
+        quartz_cron_expression: "0 0 4 */10 * ?"
+        timezone_id: UTC
+      queue:
+        enabled: false
+
+    # --- Pipeline 5: Sales Pipeline Gold Aggregation ---
+    sales_pipeline_gold_job:
+      name: sales_pipeline_gold_job
+      tags:
+        team: revenue-analytics
+        domain: customer_orders
+      tasks:
+        - task_key: sales_gold_agg
+          notebook_task:
+            notebook_path: /Shared/patchit/sales_pipeline_gold_job
+            source: WORKSPACE
+          existing_cluster_id: 0126-041553-ds2n8zhe
+      schedule:
+        quartz_cron_expression: "0 */5 * * * ?"
+        timezone_id: UTC
+      queue:
+        enabled: false
+
+    # --- Pipeline 6: Product Line Info Catalog Sync ---
+    product_line_info_job:
+      name: product_line_info_job
+      tags:
+        team: product-catalog
+        domain: customer_payments
+      tasks:
+        - task_key: product_catalog_sync
+          notebook_task:
+            notebook_path: /Shared/patchit/product_line_info_job
+            source: WORKSPACE
+          existing_cluster_id: 0126-041553-ds2n8zhe
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: UTC
+      queue:
+        enabled: false
+
+    # --- Pipeline 7: Store Info Daily Refresh ---
+    store_info_daily_job:
+      name: store_info_daily_job
+      tags:
+        team: store-ops
+        domain: customer_orders
+      tasks:
+        - task_key: store_refresh
+          notebook_task:
+            notebook_path: /Shared/patchit/store_info_daily_job
+            source: WORKSPACE
+          existing_cluster_id: 0126-041553-ds2n8zhe
+      schedule:
+        quartz_cron_expression: "0 0 5 */3 * ?"
+        timezone_id: UTC
       queue:
         enabled: false
