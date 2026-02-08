@@ -132,3 +132,23 @@ resources:
         timezone_id: UTC
       queue:
         enabled: false
+
+    # --- Pipeline 8: Retail Orders Quality Checks ---
+    patchit-retail-orders:
+      name: "[dev patchit23] patchit-retail-orders"
+      tags:
+        team: data-quality
+        domain: customer_orders
+      tasks:
+        - task_key: quality_publish
+          notebook_task:
+            notebook_path: /Shared/patchit/quality_notebook
+            source: WORKSPACE
+            base_parameters:
+              pipeline_id: retail_orders
+          existing_cluster_id: 0126-041553-ds2n8zhe
+      schedule:
+        quartz_cron_expression: "0 */10 * * * ?"
+        timezone_id: UTC
+      queue:
+        enabled: false
