@@ -55,9 +55,10 @@ def run_pipeline(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     return {"bronze": len(rows), "silver": len(good), "bad": len(bad), "gold": gold}
 
 
-if __name__ == "__main__":
-    sample = [
-        {"id": 1, "event_ts": "2025-01-01T00:00:00Z", "status": "ok", "value": 1.2},
-        {"id": 2, "event_ts": None, "status": "ok", "value": 2.5},
-    ]
-    print(json.dumps(run_pipeline(sample), indent=2))
+# Execute pipeline with sample data (runs in both notebook and script mode)
+sample = [
+    {"id": 1, "event_ts": "2025-01-01T00:00:00Z", "status": "ok", "value": 1.2},
+    {"id": 2, "event_ts": None, "status": "ok", "value": 2.5},
+]
+result = run_pipeline(sample)
+print(json.dumps(result, indent=2))
